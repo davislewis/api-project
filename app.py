@@ -1,9 +1,30 @@
 from flask import Flask, request, jsonify
+import json
+import os
 
 app = Flask(__name__)
 
-songs = []
-artists = []
+# File paths
+SONGS_FILE = "songs.json"
+ARTISTS_FILE = "artists.json"
+
+# Helper functions to load/save data
+def load_data(file_path):
+    if not os.path.exists(file_path):
+        return []
+    with open(file_path, "r") as f:
+        try:
+            return json.load(f)
+        except json.JSONDecodeError:
+            return []
+
+def save_data(file_path, data):
+    with open(file_path, "w") as f:
+        json.dump(data, f, indent=4)
+
+# Initialize data
+songs = load_data(SONGS_FILE)
+artists = load_data(ARTISTS_FILE)
 
 @app.route("/")
 def home():
@@ -112,7 +133,4 @@ def delete_artist(artist_id):
     return jsonify({"error": "Artist not found"}), 404
 
 if __name__ == "__main__":
-    app.run(debug=True)
-
-    ## make it accessible to the outside world
-    # app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=True, use_reloader=False)
